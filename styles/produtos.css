@@ -1,0 +1,151 @@
+.layout {
+  display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  background-color: #0f172a;
+  color: white;
+  padding: 25px 20px;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+/* MAIN */
+.main {
+  margin-left: 240px; /* tem que ser igual à largura da sidebar */
+  padding: 30px 40px;
+  flex: 1;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+/* =========================
+   MAIN AREA
+========================= */
+.main {
+  margin-left: 240px;
+  padding: 40px;
+  background-color: #f3f4f6;
+  min-height: 100vh;
+}
+
+/* =========================
+   HEADER
+========================= */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.topbar h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* =========================
+   BOTÃO
+========================= */
+.btn-primary {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37,99,235,0.3);
+}
+
+/* =========================
+   CARD CONTAINER
+========================= */
+.content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* =========================
+   SEARCH
+========================= */
+.products-filter {
+  margin-bottom: 20px;
+}
+
+.products-filter input {
+  width: 100%;
+  max-width: 350px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  outline: none;
+  transition: 0.3s;
+}
+
+.products-filter input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+/* =========================
+   TABLE
+========================= */
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.products-table thead {
+  background: #f9fafb;
+}
+
+.products-table th {
+  text-align: left;
+  padding: 15px;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.products-table td {
+  padding: 15px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.products-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+.btn-edit {
+  background-color: #facc15;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.btn-delete {
+  background-color: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}

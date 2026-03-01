@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produtos - Sistema</title>
+  <link rel="stylesheet" href="./styles/produtos.css">
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2 class="logo">SGP</h2>
+
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="produtos.html" class="active">Produtos</a></li>
+        <li><a href="clientes.html">Clientes</a></li>
+        <li><a href="#">Pedidos</a></li>
+        <li><a href="#">Relatórios</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+
+  <main class="main">
+
+    <header class="topbar">
+  <h1>Produtos</h1>
+  <button class="btn-primary" id="openModal">+ Novo Produto</button>
+</header>
+
+<section class="content">
+
+  <div class="products-filter">
+    <input type="text" id="searchInput" placeholder="Buscar produto...">
+  </div>
+
+  <div class="products-table-section">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Preço</th>
+          <th>Estoque</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="productsTable">
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
+  </main>
+
+
+</div>
+
+
+<div class="modal" id="productModal">
+  <div class="modal-content">
+    <h2 id="modalTitle">Novo Produto</h2>
+
+    <input type="text" id="productName" placeholder="Nome do produto">
+    <input type="number" id="productPrice" placeholder="Preço">
+    <input type="number" id="productStock" placeholder="Estoque">
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="closeModal">Cancelar</button>
+      <button class="btn-primary" id="saveProduct">Salvar</button>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal" id="productModal">
+  <div class="modal-content">
+    <h2 id="modalTitle">Novo Produto</h2>
+
+    <input type="text" id="productName" placeholder="Nome do produto">
+    <input type="number" id="productPrice" placeholder="Preço">
+    <input type="number" id="productStock" placeholder="Estoque">
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="closeModal">Cancelar</button>
+      <button class="btn-primary" id="saveProduct">Salvar</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+let products = [];
+let editingIndex = null;
+
+const modal = document.getElementById("productModal");
+const openModalBtn = document.getElementById("openModal");
+const closeModalBtn = document.getElementById("closeModal");
+const saveBtn = document.getElementById("saveProduct");
+const table = document.getElementById("productsTable");
+const searchInput = document.getElementById("searchInput");
+
+openModalBtn.onclick = () => {
+  modal.style.display = "flex";
+  editingIndex = null;
+};
+
+closeModalBtn.onclick = () => {
+  modal.style.display = "none";
+};
+
+function renderProducts() {
+  table.innerHTML = "";
+  products.forEach((product, index) => {
+    table.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${product.name}</td>
+        <td>R$ ${product.price}</td>
+        <td>${product.stock}</td>
+        <td>
+          <button class="btn-edit" onclick="editProduct(${index})">Editar</button>
+          <button class="btn-delete" onclick="deleteProduct(${index})">Excluir</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+saveBtn.onclick = () => {
+  const name = document.getElementById("productName").value;
+  const price = document.getElementById("productPrice").value;
+  const stock = document.getElementById("productStock").value;
+
+  if (!name || !price || !stock) return alert("Preencha todos os campos!");
+
+  if (editingIndex === null) {
+    products.push({ name, price, stock });
+  } else {
+    products[editingIndex] = { name, price, stock };
+  }
+
+  modal.style.display = "none";
+  renderProducts();
+};
+
+function editProduct(index) {
+  editingIndex = index;
+  document.getElementById("productName").value = products[index].name;
+  document.getElementById("productPrice").value = products[index].price;
+  document.getElementById("productStock").value = products[index].stock;
+  modal.style.display = "flex";
+}
+
+function deleteProduct(index) {
+  products.splice(index, 1);
+  renderProducts();
+}
+
+searchInput.addEventListener("input", function () {
+  const value = this.value.toLowerCase();
+  const rows = table.getElementsByTagName("tr");
+  for (let row of rows) {
+    row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+  }
+});
+</script>
+</body>
+</html>
