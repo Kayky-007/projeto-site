@@ -1,0 +1,69 @@
+/* SIDEBAR */
+
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    background: #1e1e2f;
+    color: white;
+    position: fixed;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    margin-bottom: 30px;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li a {
+    text-decoration: none;  /* REMOVE SUBLINHADO */
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.sidebar ul li {
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.sidebar ul li:hover {
+    background: #4f46e5;
+}
+
+/* MAIN */
+
+.main {
+    margin-left: 220px;
+    padding: 20px;
+}
+
+.topbar {
+    margin-bottom: 20px;
+}
+
+.cards {
+    display: flex;
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 200px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+

@@ -1,0 +1,57 @@
+/* MODAL DESEJA SAIR */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    width: 320px;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.modal-buttons button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.modal-title{
+    color: black;
+}
+.cancelar {
+    background: #5f7cb6;
+    color: white;
+}
+
+.confirmar {
+    background: #ef4444;
+    color: white;
+}
+
+.confirmar:hover {
+    background: #dc2626;
+}
+
+.cancelar:hover {
+    background: #d1d5db;
+}
+
+
