@@ -316,4 +316,54 @@
 @keyframes scaleIn {
     from { transform: scale(0.95); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
+
 }
+
+
+
+
+/* CAMPO DE BUSCAR PRODUTO */
+
+/* ===== TOPBAR ACTIONS ===== */
+
+.topbar-actions{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+/* ===== SEARCH BAR ===== */
+
+.search-container{
+    position:relative;
+}
+
+.search-container i{
+    position:absolute;
+    left:12px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#94a3b8;
+    font-size:18px;
+}
+
+.search-container input{
+    width:260px;
+    padding:10px 12px 10px 38px;
+    border-radius:10px;
+    border:1px solid #e2e8f0;
+    outline:none;
+    font-size:14px;
+    background:white;
+    transition:all .25s ease;
+}
+
+/* focus elegante */
+
+.search-container input:focus{
+    border-color:#6366f1;
+    box-shadow:0 0 0 3px rgba(99,102,241,0.15);
+}
+
+
+

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./css/sidebar.css">
     <link rel="stylesheet" href="./css/produtos.css">
     <link rel="stylesheet" href="./css/modalSair.css">
+    <link rel="stylesheet" href="./css/modalExcluirProduto.css">
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
@@ -18,10 +19,22 @@
     <div class="topbar">
         <h1>Produtos</h1>
 
+        <div class="search-container">
+    <i class='bx bx-search'></i>
+    <input 
+        type="text" 
+        id="searchProduct"
+        placeholder="Buscar produtos..."
+        onkeyup="buscarProdutos()"
+    >
+</div>
+
         <button class="btn-add-product" onclick="abrirModalProduto()">
             <i class='bx bx-plus'></i>
             Novo Produto
         </button>
+
+        
     </div>
 
     <div class="products-grid">
@@ -41,8 +54,8 @@
             <span class="stock in-stock">Em estoque</span>
 
             <div class="card-actions">
-                <button class="btn primary">Alterar</button>
-                <button class="btn danger">Remover</button>
+                <a href="produto_editar.php?id=001" class="btn primary">Alterar</a>
+                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
             </div>
         </div>
     </div>
@@ -63,8 +76,8 @@
             <span class="stock out-stock">Esgotado</span>
 
             <div class="card-actions">
-                <button class="btn primary">Alterar</button>
-                <button class="btn danger">Remover</button>
+                <a href="produto_editar.php?id=002" class="btn primary">Alterar</a>
+                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
             </div>
         </div>
     </div>
@@ -85,8 +98,8 @@
             <span class="stock in-stock">Em estoque</span>
 
             <div class="card-actions">
-                <button class="btn primary">Alterar</button>
-                <button class="btn danger">Remover</button>
+                <a href="produto_editar.php?id=003" class="btn primary">Alterar</a>
+                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
             </div>
         </div>
     </div>
@@ -105,8 +118,8 @@
             <span class="stock in-stock">Em estoque</span>
 
             <div class="card-actions">
-                <button class="btn primary">Alterar</button>
-                <button class="btn danger">Remover</button>
+                <a href="produto_editar.php?id=003" class="btn primary">Alterar</a>
+                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
             </div>
         </div>
     </div>
@@ -125,8 +138,8 @@
             <span class="stock in-stock">Em estoque</span>
 
             <div class="card-actions">
-                <button class="btn primary">Alterar</button>
-                <button class="btn danger">Remover</button>
+                <a href="produto_editar.php?id=003" class="btn primary">Alterar</a>
+                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
             </div>
         </div>
     </div>
@@ -145,8 +158,9 @@
             <span class="stock in-stock">Em estoque</span>
 
             <div class="card-actions">
-                <button class="btn primary">Alterar</button>
-                <button class="btn danger">Remover</button>
+<a href="produto_editar.php?id=001" class="btn primary">
+    Alterar
+</a>                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
             </div>
         </div>
     </div>
@@ -207,7 +221,9 @@
 
             <div class="modal-actions">
                 <button type="button" class="btn cancel" onclick="fecharModalProduto()">Cancelar</button>
-                <button type="submit" class="btn primary">Salvar Produto</button>
+                <button type="button" class="btn primary" onclick="salvarProduto()">
+  Salvar Produto
+</button>
             </div>
 
         </form>
@@ -217,9 +233,8 @@
 
 
 
-
-
-
+<div id="toastContainer" class="toast-container"></div>
+<?php include("components/modalExcluirProduto.php"); ?>
 <?php include("components/modalSair.php"); ?>
 <script src="./js/main.js"></script>
 </body>

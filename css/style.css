@@ -240,3 +240,59 @@ body {
 
 
 
+
+/* ALERT DE CRIAR NOVO PRODUTO */
+
+/* ===== TOAST CONTAINER ===== */
+
+.toast-container{
+    position:fixed;
+    top:25px;
+    right:25px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    z-index:999999;
+}
+
+/* ===== TOAST BASE ===== */
+
+.toast{
+    min-width:260px;
+    padding:14px 16px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    color:#fff;
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+    animation:toastSlide .4s ease;
+}
+
+/* ===== SUCCESS ===== */
+
+.toast-success{
+    background:linear-gradient(135deg,#10b981,#22c55e);
+}
+
+/* ===== ICON ===== */
+
+.toast i{
+    font-size:18px;
+}
+
+/* ===== ANIMAÇÃO ===== */
+
+@keyframes toastSlide{
+    from{
+        transform:translateX(50px);
+        opacity:0;
+    }
+    to{
+        transform:translateX(0);
+        opacity:1;
+    }
+}
+
+

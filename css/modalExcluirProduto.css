@@ -1,0 +1,51 @@
+/* MODAL EXCLUIR */
+
+.modal-delete{
+    width:380px;
+    background:white;
+    border-radius:18px;
+    padding:30px;
+    text-align:center;
+    animation:scaleIn .25s ease;
+}
+
+.delete-icon{
+    width:60px;
+    height:60px;
+    margin:auto;
+    border-radius:50%;
+    background:#fee2e2;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:15px;
+}
+
+.delete-icon i{
+    font-size:28px;
+    color:#ef4444;
+}
+
+.modal-delete h3{
+    margin-bottom:8px;
+}
+
+.modal-delete p{
+    font-size:14px;
+    color:#64748b;
+}
+
+.delete-actions{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.btn.cancel{
+    background:#e2e8f0;
+}
+
+.btn.cancel:hover{
+    background:#cbd5e1;
+}
