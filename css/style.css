@@ -190,8 +190,8 @@ body {
     width: 45px;
     height: 45px;
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.05);
     color: white;
     font-size: 20px;
     cursor: pointer;
@@ -230,8 +230,8 @@ body {
   font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
-  background: rgba(40, 42, 122, 0.1); /* indigo bem discreto */
-  border: 1px solid rgba(214, 10, 180, 0.18);
+  background: rgba(0, 0, 0, 0.1); /* indigo bem discreto */
+  border: 1px solid rgba(0, 0, 0, 0.18);
   padding: 6px 10px;
   border-radius: 10px;
   white-space: nowrap;
