@@ -1,3 +1,38 @@
+<?php
+ 
+require_once "model/Produto.php";
+ 
+$produto  = new Produto();
+$produtos = $produto->listarTodos();
+$categorias = $produto->listarCategorias();
+ 
+// Salva um novo produto quando o formulário for enviado
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+ 
+    $dados = [
+        'nome_produto'      => $_POST['nome_produto'],
+        'preco_produto'     => $_POST['preco_produto'],
+        'id_categoria'      => $_POST['id_categoria'],
+        'estoque_produto'   => $_POST['estoque_produto'],
+        'descricao_produto' => $_POST['descricao_produto'],
+        'imagem_produto'    => null
+    ];
+ 
+    // Se o usuário enviou uma imagem, salva ela na pasta
+    if (!empty($_FILES['imagem_produto']['name'])) {
+        $dados['imagem_produto'] = $produto->salvarImagem($_FILES['imagem_produto']);
+    }
+ 
+    $produto->criar($dados);
+ 
+    // Recarrega a página para mostrar o novo produto
+    header("Location: produtos.php");
+    exit;
+}
+ 
+?>
+
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -13,6 +48,9 @@
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <style>
+  .main {
+    margin-left: 240px; /* empurra pra não cobrir a sidebar */
+}
 
     /* demo trigger */
     .open-btn {
@@ -76,6 +114,7 @@
       padding: 22px 26px 18px;
       border-bottom: 1.5px solid #f0f3fb;
     }
+    
 
     .modal-header-left {
       display: flex;
@@ -272,296 +311,232 @@
     
     </style>
 <body>
+ 
 <?php include("components/sidebar.php"); ?>
  
 <div class="main">
+ 
     <div class="topbar">
         <h1>Produtos</h1>
-
+ 
         <div class="search-container">
-    <i class='bx bx-search'></i>
-    <input 
-        type="text" 
-        id="searchProduct"
-        placeholder="Buscar produtos..."
-        onkeyup="buscarProdutos()"
-    >
-</div>
-
+            <i class='bx bx-search'></i>
+            <input
+                type="text"
+                id="searchProduct"
+                placeholder="Buscar produtos..."
+                onkeyup="buscarProdutos()"
+            >
+        </div>
+ 
         <button class="btn-add-product" onclick="abrirModalProduto()">
             <i class='bx bx-plus'></i>
             Novo Produto
         </button>
-
-        
     </div>
-
-    <div class="products-grid">
-
-    <!-- CARD 1 -->
-    <div class="product-card">
-        <div class="product-image">
-            <img src="https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSv4mEsKj7jOlaoKR33qlkkgKtkVmb2TuHeHUg8Mi1My2v5Ii5GvsBI5EVR_FxX2xuqd6MdMpgFZPPsShhWJBCGZpkWVjUp-jajtvezet2lc21ji3Yeyy6RBg&usqp=CAc" alt="Produto">
-            <div class="badge">ID #001 • Eletrônicos</div>
-        </div>
-
-        <div class="product-content">
-            <h3>Mouse Gamer RGB</h3>
-            <span class="price"><i>R$ 149,90</i></span>
-            <p>Mouse ergonômico com iluminação RGB personalizável e alta precisão para jogos.</p>
-
-            <span class="stock in-stock">Em estoque</span>
-
-            <div class="card-actions">
-                <a href="produto_editar.php?id=001" class="btn primary">Editar</a>
-                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
-            </div>
-        </div>
+ 
+ 
+    <!-- GRID DE PRODUTOS -->
+    <div class="products-grid" id="productsGrid">
+ 
+        <?php if (empty($produtos)): ?>
+ 
+            <p style="color:#7a85a3; font-weight:700;">Nenhum produto cadastrado ainda.</p>
+ 
+        <?php else: ?>
+ 
+            <?php foreach ($produtos as $p): ?>
+ 
+                <div class="product-card">
+ 
+                    <div class="product-image">
+ 
+                        <?php if ($p['imagem_produto']): ?>
+                            <img src="./img/<?= htmlspecialchars($p['imagem_produto']) ?>" alt="<?= htmlspecialchars($p['nome_produto']) ?>">
+                        <?php else: ?>
+                            <img src="assets/img/sem-imagem.png" alt="Sem imagem">
+                        <?php endif; ?>
+ 
+                        <div class="badge">
+                            ID #<?= str_pad($p['id_produto'], 3, '0', STR_PAD_LEFT) ?>
+                            • <?= htmlspecialchars($p['nome_categoria'] ?? 'Sem categoria') ?>
+                        </div>
+ 
+                    </div>
+ 
+                    <div class="product-content">
+ 
+                        <h3><?= htmlspecialchars($p['nome_produto']) ?></h3>
+ 
+                        <span class="price">
+                            <i>R$ <?= number_format($p['preco_produto'], 2, ',', '.') ?></i>
+                        </span>
+ 
+                        <p><?= htmlspecialchars($p['descricao_produto'] ?? '') ?></p>
+ 
+                        <?php if ($p['estoque_produto'] > 0): ?>
+                            <span class="stock in-stock">Em estoque (<?= $p['estoque_produto'] ?>)</span>
+                        <?php else: ?>
+                            <span class="stock out-stock">Esgotado</span>
+                        <?php endif; ?>
+ 
+                        <div class="card-actions">
+                            <a href="produto_editar.php?id=<?= $p['id_produto'] ?>" class="btn primary">
+                                Editar
+                            </a>
+                            <button
+                                class="btn danger"
+                                onclick="abrirModalExcluir(this)"
+                                data-id="<?= $p['id_produto'] ?>"
+                                data-nome="<?= htmlspecialchars($p['nome_produto']) ?>"
+                            >
+                                Remover
+                            </button>
+                        </div>
+ 
+                    </div>
+ 
+                </div>
+ 
+            <?php endforeach; ?>
+ 
+        <?php endif; ?>
+ 
     </div>
-
-
-    <!-- CARD 2 -->
-    <div class="product-card">
-        <div class="product-image">
-            <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8" alt="Produto">
-            <div class="badge">ID #002 • Informática</div>
-        </div>
-
-        <div class="product-content">
-            <h3>Notebook Ultra Slim</h3>
-            <span class="price"><i>R$ 149,90</i></span>
-            <p>Notebook leve e potente com SSD NVMe e tela Full HD ideal para produtividade.</p>
-
-            <span class="stock out-stock">Esgotado</span>
-
-            <div class="card-actions">
-                <a href="produto_editar.php?id=002" class="btn primary">Editar</a>
-                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- CARD 3 -->
-    <div class="product-card">
-        <div class="product-image">
-            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30" alt="Produto">
-            <div class="badge">ID #003 • Acessórios</div>
-        </div>
-
-        <div class="product-content">
-            <h3>Smartwatch Series X</h3>
-            <span class="price"><i>R$ 149,90</i></span>
-            <p>Relógio inteligente com monitoramento cardíaco, notificações e bateria de longa duração.</p>
-
-            <span class="stock in-stock">Em estoque</span>
-
-            <div class="card-actions">
-                <a href="produto_editar.php?id=003" class="btn primary">Editar</a>
-                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
-            </div>
-        </div>
-    </div>
-
-        <div class="product-card">
-        <div class="product-image">
-            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30" alt="Produto">
-            <div class="badge">ID #003 • Acessórios</div>
-        </div>
-
-        <div class="product-content">
-            <h3>Smartwatch Series X</h3>
-            <span class="price"><i>R$ 149,90</i></span>
-            <p>Relógio inteligente com monitoramento cardíaco, notificações e bateria de longa duração.</p>
-
-            <span class="stock in-stock">Em estoque</span>
-
-            <div class="card-actions">
-                <a href="produto_editar.php?id=003" class="btn primary">Editar</a>
-                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
-            </div>
-        </div>
-    </div>
-
-        <div class="product-card">
-        <div class="product-image">
-            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30" alt="Produto">
-            <div class="badge">ID #003 • Acessórios</div>
-        </div>
-
-        <div class="product-content">
-            <h3>Smartwatch Series X</h3>
-            <span class="price"><i>R$ 149,90</i></span>
-            <p>Relógio inteligente com monitoramento cardíaco, notificações e bateria de longa duração.</p>
-
-            <span class="stock in-stock">Em estoque</span>
-
-            <div class="card-actions">
-                <a href="produto_editar.php?id=003" class="btn primary">Editar</a>
-                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
-            </div>
-        </div>
-    </div>
-
-        <div class="product-card">
-        <div class="product-image">
-            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30" alt="Produto">
-            <div class="badge">ID #003 • Acessórios</div>
-        </div>
-
-        <div class="product-content">
-            <h3>Smartwatch Series X</h3>
-            <span class="price"><i>R$ 149,90</i></span>
-            <p>Relógio inteligente com monitoramento cardíaco, notificações e bateria de longa duração.</p>
-
-            <span class="stock in-stock">Em estoque</span>
-
-            <div class="card-actions">
-<a href="produto_editar.php?id=001" class="btn primary">
-    Editar
-</a>                <button class="btn danger" onclick="abrirModalExcluir(this)">Remover</button>
-            </div>
-        </div>
-    </div>
-
+ 
 </div>
-
-</div>
-
-
-
-
-<!-- MODAL DE + NOVO PRODUTO -->
-<!-- Modal -->
-  <div id="productModal" class="modal">
+ 
+ 
+<!-- MODAL NOVO PRODUTO -->
+<div id="productModal" class="modal">
     <div class="modal-product">
-
-      <!-- Header -->
-      <div class="modal-header">
-        <div class="modal-header-left">
-          <div class="header-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#6c7ef8">
-              <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/>
-              <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-            </svg>
-          </div>
-          <h2>Novo Produto</h2>
-        </div>
-        <button class="btn-close" onclick="fecharModalProduto()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Body -->
-      <div class="modal-body">
-        <form class="product-form" id="productForm">
-          <div class="form-grid">
-
-            <div class="form-group">
-              <label>Nome do Produto</label>
-              <input type="text" required placeholder="Ex: Tênis Air Max"/>
+ 
+        <div class="modal-header">
+            <div class="modal-header-left">
+                <div class="header-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#6c7ef8">
+                        <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/>
+                        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+                    </svg>
+                </div>
+                <h2>Novo Produto</h2>
             </div>
-
-            <div class="form-group">
-              <label>Preço (R$)</label>
-              <input type="number" required placeholder="0,00" step="0.01"/>
-            </div>
-
-            <div class="form-group">
-              <label>Categoria</label>
-              <select required>
-                <option value="" disabled selected>Selecionar…</option>
-                <option>Eletrônicos</option>
-                <option>Informática</option>
-                <option>Acessórios</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Estoque</label>
-              <input type="number" required placeholder="0"/>
-            </div>
-
-            <div class="form-group full">
-              <label>Descrição</label>
-              <textarea rows="3" required placeholder="Descrição curta do produto…"></textarea>
-            </div>
-
-            <div class="form-group full">
-              <label>Imagem do Produto</label>
-
-              <!-- Preview (oculto até ter imagem) -->
-              <div class="img-preview" id="imgPreview" style="display:none;">
-                <img id="previewImg" src="" alt="Preview"/>
-                <button type="button" class="img-remove" onclick="removerImagem()" title="Remover imagem">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <button class="btn-close" onclick="fecharModalProduto()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 6L6 18M6 6l12 12"/>
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Input file (oculto quando há imagem) -->
-              <label class="file-label" id="filePickerLabel">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="3"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <path d="M21 15l-5-5L5 21"/>
                 </svg>
-                <span id="fileLabel">Clique para escolher uma imagem…</span>
-                <input type="file" accept="image/*" required id="fileInput"/>
-              </label>
-            </div>
-
-          </div>
-        </form>
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer">
-                <button type="submit" class="btn primary" onclick="salvarProduto()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 6L9 17l-5-5"/>
-          </svg>
-          Salvar Produto
-        </button>
-
-      </div>
-
+            </button>
+        </div>
+ 
+        <div class="modal-body">
+ 
+            <!-- action="" envia para essa mesma página -->
+            <!-- enctype="multipart/form-data" é obrigatório para enviar imagem -->
+            <form class="product-form" id="productForm" method="POST" action="produtos.php" enctype="multipart/form-data">
+ 
+                <div class="form-grid">
+ 
+                    <div class="form-group">
+                        <label>Nome do Produto</label>
+                        <input type="text" name="nome_produto" required placeholder="Ex: Tênis Air Max"/>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label>Preço (R$)</label>
+                        <input type="number" name="preco_produto" required placeholder="0,00" step="0.01"/>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select name="id_categoria" required>
+                            <option value="" disabled selected>Selecionar…</option>
+                            <?php foreach ($categorias as $cat): ?>
+                                <option value="<?= $cat['id_categoria'] ?>">
+                                    <?= htmlspecialchars($cat['nome_categoria']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label>Estoque</label>
+                        <input type="number" name="estoque_produto" required placeholder="0"/>
+                    </div>
+ 
+                    <div class="form-group full">
+                        <label>Descrição</label>
+                        <textarea name="descricao_produto" rows="3" placeholder="Descrição curta do produto…"></textarea>
+                    </div>
+ 
+                    <div class="form-group full">
+                        <label>Imagem do Produto</label>
+ 
+                        <div class="img-preview" id="imgPreview" style="display:none;">
+                            <img id="previewImg" src="" alt="Preview"/>
+                            <button type="button" class="img-remove" onclick="removerImagem()" title="Remover imagem">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+ 
+                        <label class="file-label" id="filePickerLabel">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <path d="M21 15l-5-5L5 21"/>
+                            </svg>
+                            <span id="fileLabel">Clique para escolher uma imagem…</span>
+                            <input type="file" name="imagem_produto" accept="image/*" id="fileInput"/>
+                        </label>
+                    </div>
+ 
+                </div>
+ 
+                <div class="modal-footer">
+                    <button type="button" class="btn cancel" onclick="fecharModalProduto()">Cancelar</button>
+                    <button type="submit" class="btn primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                        Salvar Produto
+                    </button>
+                </div>
+ 
+            </form>
+ 
+        </div>
+ 
     </div>
-  </div>
-
-
-
+</div>
+ 
+ 
 <div id="toastContainer" class="toast-container"></div>
 <?php include("components/modalExcluirProduto.php"); ?>
 <?php include("components/modalSair.php"); ?>
+ 
 <script src="./js/main.js"></script>
-
-
-
+ 
 <script>
-       // nome do arquivo + preview
+    // Preview da imagem antes de enviar
     document.getElementById('fileInput').addEventListener('change', function() {
-      if (!this.files.length) return;
-      const file = this.files[0];
-      const reader = new FileReader();
-      reader.onload = e => {
-        document.getElementById('previewImg').src = e.target.result;
-        document.getElementById('imgPreview').style.display = 'block';
-        document.getElementById('filePickerLabel').style.display = 'none';
-      };
-      reader.readAsDataURL(file);
+        if (!this.files.length) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imgPreview').style.display = 'block';
+            document.getElementById('filePickerLabel').style.display = 'none';
+        };
+        reader.readAsDataURL(this.files[0]);
     });
-
+ 
     function removerImagem() {
-      document.getElementById('fileInput').value = '';
-      document.getElementById('previewImg').src = '';
-      document.getElementById('imgPreview').style.display = 'none';
-      document.getElementById('filePickerLabel').style.display = 'flex';
+        document.getElementById('fileInput').value = '';
+        document.getElementById('previewImg').src = '';
+        document.getElementById('imgPreview').style.display = 'none';
+        document.getElementById('filePickerLabel').style.display = 'flex';
     }
 </script>
-
+ 
 </body>
 </html>
