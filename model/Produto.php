@@ -1,6 +1,7 @@
 <?php
 
-require_once "conexão/Banco.php";
+require_once __DIR__ . "/../conexao/Banco.php";
+
 
 class Produto {
 
@@ -22,6 +23,29 @@ class Produto {
 
         return $resultado->fetch_all(MYSQLI_ASSOC);
     }
+
+public function criarCategoria($nome) {
+
+    // Verifica se já existe
+    $stmt = $this->db->prepare("
+        SELECT id_categoria FROM categorias WHERE nome_categoria = ?
+    ");
+    $stmt->bind_param("s", $nome);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+
+    if ($resultado->num_rows > 0) {
+        return false;
+    }
+
+    // Cria a nova categoria
+    $stmt = $this->db->prepare("
+        INSERT INTO categorias (nome_categoria) VALUES (?)
+    ");
+    $stmt->bind_param("s", $nome);
+    return $stmt->execute();
+}
+
 
     // Busca um produto pelo ID
     public function buscarPorId($id) {

@@ -1,3 +1,59 @@
+<?php require_once "auth.php"; ?>
+<?php
+ 
+require_once "model/Produto.php";
+ 
+$produto = new Produto();
+ 
+// Pega o id da URL  ex: produto_editar.php?id=1
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+ 
+// Busca o produto no banco
+$dados = $produto->buscarPorId($id);
+ 
+// Se não encontrar o produto, volta para a lista
+if (!$dados) {
+    header("Location: produtos.php");
+    exit;
+}
+ 
+$categorias = $produto->listarCategorias();
+ 
+// Salva as alterações quando o formulário for enviado
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+ 
+    $novosDados = [
+        'nome_produto'      => $_POST['nome_produto'],
+        'preco_produto'     => $_POST['preco_produto'],
+        'id_categoria'      => $_POST['id_categoria'],
+        'estoque_produto'   => $_POST['estoque_produto'],
+        'descricao_produto' => $_POST['descricao_produto'],
+        'imagem_produto'    => $dados['imagem_produto'] // mantém a imagem atual por padrão
+    ];
+ 
+    // Se o usuário enviou uma imagem nova
+    if (!empty($_FILES['imagem_produto']['name'])) {
+ 
+        // Apaga a imagem antiga da pasta
+        if (!empty($dados['imagem_produto'])) {
+            $caminhoAntigo = "./img/" . $dados['imagem_produto'];
+            if (file_exists($caminhoAntigo)) {
+                unlink($caminhoAntigo);
+            }
+        }
+ 
+        // Salva a nova imagem
+        $novosDados['imagem_produto'] = $produto->salvarImagem($_FILES['imagem_produto']);
+    }
+ 
+    $produto->atualizar($id, $novosDados);
+ 
+    header("Location: produto_editar.php?id=$id&salvo=1");
+    exit;
+}
+ 
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -220,132 +276,165 @@
   </style>
 </head>
 <body>
-
+ 
+<?php include("components/sidebar.php"); ?>
+ 
 <div class="container">
-
-  <div class="header">
-    <a href="produtos.php" class="btn-back">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5M12 5l-7 7 7 7"/>
-      </svg>
-      Voltar
-    </a>
-    <h1 class="title">Editar Produto</h1>
-  </div>
-
-  <div class="card">
-    <form id="editForm">
-      <div class="form-grid">
-
-        <div class="field">
-          <label>Nome do Produto</label>
-          <input type="text" value="Tênis Air Max Pro" placeholder="Ex: Tênis Air Max Pro" />
-        </div>
-
-        <div class="field">
-          <label>Categoria</label>
-          <select>
-            <option>Calçados</option>
-            <option>Eletrônicos</option>
-            <option>Acessórios</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Preço (R$)</label>
-          <input type="number" step="0.01" value="349.90" placeholder="0,00" />
-        </div>
-
-        <div class="field">
-          <label>Estoque</label>
-          <input type="number" value="7" placeholder="0" />
-        </div>
-
-        <div class="field full">
-          <label>Descrição</label>
-          <textarea>Tênis de alta performance para uso diário e esportes.</textarea>
-        </div>
-
-        <div class="field full">
-          <label>Imagem do Produto</label>
-
-          <!-- Preview (oculto até ter imagem) -->
-          <div class="img-preview" id="imgPreview" style="display:none;">
-            <img id="previewImg" src="" alt="Preview"/>
-            <button type="button" class="img-remove" onclick="removerImagem()" title="Remover imagem">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 6L6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Input file -->
-          <label class="file-label" id="filePickerLabel">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="3"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <path d="M21 15l-5-5L5 21"/>
+ 
+    <div class="header">
+        <a href="produtos.php" class="btn-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 5l-7 7 7 7"/>
             </svg>
-            <span id="fileLabel">Clique para escolher uma imagem…</span>
-            <input type="file" accept="image/*" id="fileInput" />
-          </label>
-        </div>
-
-      </div>
-
-      <hr class="divider" />
-
-      <div class="form-actions">
-        <button type="submit" class="btn btn-save" >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 6L9 17l-5-5"/>
-          </svg>
-          Salvar Alterações
-        </button>
-      </div>
-
-    </form>
-  </div>
-
+            Voltar
+        </a>
+        <h1 class="title">Editar Produto</h1>
+    </div>
+ 
+    <div class="card">
+ 
+        <form id="editForm" method="POST" action="produto_editar.php?id=<?= $id ?>" enctype="multipart/form-data">
+ 
+            <div class="form-grid">
+ 
+                <div class="field">
+                    <label>Nome do Produto</label>
+                    <input
+                        type="text"
+                        name="nome_produto"
+                        value="<?= htmlspecialchars($dados['nome_produto']) ?>"
+                        placeholder="Ex: Tênis Air Max Pro"
+                        required
+                    />
+                </div>
+ 
+                <div class="field">
+                    <label>Categoria</label>
+                    <select name="id_categoria" required>
+                        <option value="">Selecionar…</option>
+                        <?php foreach ($categorias as $cat): ?>
+                            <option
+                                value="<?= $cat['id_categoria'] ?>"
+                                <?= $cat['id_categoria'] == $dados['id_categoria'] ? 'selected' : '' ?>
+                            >
+                                <?= htmlspecialchars($cat['nome_categoria']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+ 
+                <div class="field">
+                    <label>Preço (R$)</label>
+                    <input
+                        type="number"
+                        name="preco_produto"
+                        step="0.01"
+                        value="<?= $dados['preco_produto'] ?>"
+                        placeholder="0,00"
+                        required
+                    />
+                </div>
+ 
+                <div class="field">
+                    <label>Estoque</label>
+                    <input
+                        type="number"
+                        name="estoque_produto"
+                        value="<?= $dados['estoque_produto'] ?>"
+                        placeholder="0"
+                        required
+                    />
+                </div>
+ 
+                <div class="field full">
+                    <label>Descrição</label>
+                    <textarea name="descricao_produto"><?= htmlspecialchars($dados['descricao_produto'] ?? '') ?></textarea>
+                </div>
+ 
+                <div class="field full">
+                    <label>Imagem do Produto</label>
+ 
+                    <!-- Mostra a imagem atual se existir -->
+                    <div class="img-preview" id="imgPreview" <?= empty($dados['imagem_produto']) ? 'style="display:none;"' : '' ?>>
+                        <img
+                            id="previewImg"
+                            src="<?= !empty($dados['imagem_produto']) ? 'img/' . htmlspecialchars($dados['imagem_produto']) : '' ?>"
+                            alt="Preview"
+                        />
+                        <button type="button" class="img-remove" onclick="removerImagem()" title="Remover imagem">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6L6 18M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+ 
+                    <!-- Input file -->
+                    <label class="file-label" id="filePickerLabel" <?= !empty($dados['imagem_produto']) ? 'style="display:none;"' : '' ?>>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="3"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
+                        </svg>
+                        <span id="fileLabel">Clique para escolher uma imagem…</span>
+                        <input type="file" name="imagem_produto" accept="image/*" id="fileInput"/>
+                    </label>
+                </div>
+ 
+            </div>
+ 
+            <hr class="divider"/>
+ 
+            <div class="form-actions">
+                <a href="produtos.php" class="btn btn-cancel">Cancelar</a>
+                <button type="submit" class="btn btn-save">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                    Salvar Alterações
+                </button>
+            </div>
+ 
+        </form>
+ 
+    </div>
+ 
 </div>
-
+ 
+<!-- Toast de sucesso -->
 <div class="toast" id="toast">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M20 6L9 17l-5-5"/>
-  </svg>
-  Produto salvo com sucesso!
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17l-5-5"/>
+    </svg>
+    Produto salvo com sucesso!
 </div>
+ 
 
 <script>
-document.getElementById('fileInput').addEventListener('change', function () {
-    if (!this.files.length) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      document.getElementById('previewImg').src = e.target.result;
-      document.getElementById('imgPreview').style.display = 'block';
-      document.getElementById('filePickerLabel').style.display = 'none';
-    };
-    reader.readAsDataURL(this.files[0]);
-  });
-
-  function removerImagem() {
-    document.getElementById('fileInput').value = '';
-    document.getElementById('previewImg').src = '';
-    document.getElementById('imgPreview').style.display = 'none';
-    document.getElementById('filePickerLabel').style.display = 'flex';
-  }
-  const toast = document.getElementById('toast');
-  document.getElementById('editForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2800);
-    
-  });
-
-
-
+    // Mostra o toast se acabou de salvar
+    <?php if (isset($_GET['salvo'])): ?>
+        document.getElementById('toast').classList.add('show');
+        setTimeout(() => document.getElementById('toast').classList.remove('show'), 2800);
+    <?php endif; ?>
+ 
+    // Preview da imagem
+    document.getElementById('fileInput').addEventListener('change', function () {
+        if (!this.files.length) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imgPreview').style.display = 'block';
+            document.getElementById('filePickerLabel').style.display = 'none';
+        };
+        reader.readAsDataURL(this.files[0]);
+    });
+ 
+    function removerImagem() {
+        document.getElementById('fileInput').value = '';
+        document.getElementById('previewImg').src = '';
+        document.getElementById('imgPreview').style.display = 'none';
+        document.getElementById('filePickerLabel').style.display = 'flex';
+    }
 </script>
-
+ 
 </body>
 </html>

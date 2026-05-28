@@ -17,9 +17,13 @@
                 Cancelar
             </button>
 
-            <button class="btn danger" onclick="confirmarExclusao()">
-                Excluir
-            </button>
+            <!-- Esse form envia o id para deletar.php -->
+            <form id="formDeletar" method="POST" action="model/deletar_produto.php">
+                <input type="hidden" name="id_produto" id="inputIdDeletar">
+                <button type="submit" class="btn danger">
+                    Excluir
+                </button>
+            </form>
 
         </div>
 

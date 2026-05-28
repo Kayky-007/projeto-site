@@ -1,3 +1,4 @@
+<?php require_once "auth.php"; ?>
 <?php
  
 require_once "model/Produto.php";
@@ -5,6 +6,21 @@ require_once "model/Produto.php";
 $produto  = new Produto();
 $produtos = $produto->listarTodos();
 $categorias = $produto->listarCategorias();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Criar categoria
+if (isset($_POST['acao']) && $_POST['acao'] === 'criar_categoria') {
+    $criou = $produto->criarCategoria($_POST['nome_categoria']);
+
+    if ($criou) {
+        header("Location: produtos.php?cat=1");
+    } else {
+        header("Location: produtos.php?cat=erro");
+    }
+    exit;
+}
+}
  
 // Salva um novo produto quando o formulário for enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -48,8 +64,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <style>
-  .main {
-    margin-left: 240px; /* empurra pra não cobrir a sidebar */
+
+.main {
+    margin-left: 240px;
+    padding: 36px 36px 60px;
+    min-height: 100vh;
+    background: var(--bg-main);
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.topbar h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-right: auto;
 }
 
     /* demo trigger */
@@ -308,6 +343,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .btn.primary:hover { background: #5668f0; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(108,126,248,.40); }
 
     .btn svg { width: 15px; height: 15px; }
+
+    .stock-baixo  { color: #f97316; } /* laranja — até 15 */
+.stock-critico{ color: #ef4444; } /* vermelho — até 5  */
     
     </style>
 <body>
@@ -373,11 +411,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </span>
  
                         <p><?= htmlspecialchars($p['descricao_produto'] ?? '') ?></p>
- 
-                        <?php if ($p['estoque_produto'] > 0): ?>
-                            <span class="stock in-stock">Em estoque (<?= $p['estoque_produto'] ?>)</span>
-                        <?php else: ?>
+
+                        <?php if ($p['estoque_produto'] == 0): ?>
                             <span class="stock out-stock">Esgotado</span>
+                        <?php elseif ($p['estoque_produto'] <= 5): ?>
+                            <span class="stock stock-critico">Estoque Crítico (<?= $p['estoque_produto'] ?>)</span>
+                        <?php elseif ($p['estoque_produto'] <= 15): ?>
+                            <span class="stock stock-baixo">Estoque baixo (<?= $p['estoque_produto'] ?>)</span>
+                        <?php else: ?>
+                            <span class="stock in-stock">Em estoque (<?= $p['estoque_produto'] ?>)</span>
                         <?php endif; ?>
  
                         <div class="card-actions">
@@ -389,7 +431,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 onclick="abrirModalExcluir(this)"
                                 data-id="<?= $p['id_produto'] ?>"
                                 data-nome="<?= htmlspecialchars($p['nome_produto']) ?>"
-                            >
+                                >
                                 Remover
                             </button>
                         </div>
@@ -446,17 +488,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="number" name="preco_produto" required placeholder="0,00" step="0.01"/>
                     </div>
  
-                    <div class="form-group">
-                        <label>Categoria</label>
-                        <select name="id_categoria" required>
-                            <option value="" disabled selected>Selecionar…</option>
-                            <?php foreach ($categorias as $cat): ?>
-                                <option value="<?= $cat['id_categoria'] ?>">
-                                    <?= htmlspecialchars($cat['nome_categoria']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+<div class="form-group">
+    <label>Categoria</label>
+    <div style="display:flex;gap:8px;align-items:center;">
+        <select name="id_categoria" required style="flex:1">
+            <option value="" disabled selected>Selecionar…</option>
+            <?php foreach ($categorias as $cat): ?>
+                <option value="<?= $cat['id_categoria'] ?>">
+                    <?= htmlspecialchars($cat['nome_categoria']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <button type="button" onclick="abrirModalCategoria()" title="Nova categoria"
+            style="width:38px;height:38px;border-radius:9px;border:1.5px solid #dde3f0;background:#f6f8fe;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6c7ef8;flex-shrink:0;transition:background .15s;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+        </button>
+    </div>
+</div>
  
                     <div class="form-group">
                         <label>Estoque</label>
@@ -514,10 +564,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div id="toastContainer" class="toast-container"></div>
 <?php include("components/modalExcluirProduto.php"); ?>
 <?php include("components/modalSair.php"); ?>
+<!-- MODAL NOVA CATEGORIA -->
+<div id="modalCategoria" style="display:none;position:fixed;inset:0;background:rgba(30,42,69,.4);backdrop-filter:blur(3px);z-index:99999;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:white;border-radius:16px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(30,42,69,.18);border:1.5px solid #e8edf8;overflow:hidden;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1.5px solid #f0f3fb;">
+            <h2 style="font-size:16px;font-weight:800;color:#1e2a45;">Nova Categoria</h2>
+            <button onclick="fecharModalCategoria()" style="width:30px;height:30px;border:none;background:#f0f3fb;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#7a85a3;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form method="POST" action="produtos.php" style="padding:20px 22px;">
+            <input type="hidden" name="acao" value="criar_categoria">
+            <div class="form-group full">
+                <label>Nome da Categoria</label>
+                <input type="text" name="nome_categoria" placeholder="Ex: Revistas, Jornais…" required
+                    style="padding:10px 13px;border-radius:10px;border:1.5px solid #dde3f0;background:#f6f8fe;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:#1e2a45;outline:none;width:100%;">
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+                <button type="button" onclick="fecharModalCategoria()" class="btn cancel">Cancelar</button>
+                <button type="submit" class="btn primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                    Criar Categoria
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
  
 <script src="./js/main.js"></script>
  
 <script>
+
+    function abrirModalCategoria() {
+        document.getElementById('modalCategoria').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function fecharModalCategoria() {
+        document.getElementById('modalCategoria').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    // Fecha clicando fora
+    document.getElementById('modalCategoria').addEventListener('click', function(e) {
+        if (e.target === this) fecharModalCategoria();
+    });
+
+    <?php if (isset($_GET['cat'])): ?>
+        // Reabre o modal de produto após criar categoria
+        document.addEventListener('DOMContentLoaded', () => abrirModalProduto());
+    <?php endif; ?>
+
     // Preview da imagem antes de enviar
     document.getElementById('fileInput').addEventListener('change', function() {
         if (!this.files.length) return;
@@ -536,6 +640,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('imgPreview').style.display = 'none';
         document.getElementById('filePickerLabel').style.display = 'flex';
     }
+        <?php if (isset($_GET['cat']) && $_GET['cat'] === 'erro'): ?>
+        document.addEventListener('DOMContentLoaded', () => {
+            toastSucesso('Essa categoria já existe!', 'Atenção');
+            abrirModalProduto();
+        });
+    <?php endif; ?>
+
+    <?php if (isset($_GET['cat']) && $_GET['cat'] === '1'): ?>
+        document.addEventListener('DOMContentLoaded', () => abrirModalProduto());
+    <?php endif; ?>
 </script>
  
 </body>

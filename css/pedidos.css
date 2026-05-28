@@ -510,6 +510,7 @@ tbody tr:hover .icone-ver { background: var(--primary); color: white; }
     gap: 10px;
 }
 
+
 /* ========== BOTÃO NOVO PEDIDO ========== */
 .btn-novo-pedido {
     display: inline-flex;
@@ -768,3 +769,4 @@ tbody tr:hover .icone-ver { background: var(--primary); color: white; }
 }
 
 .btn svg { width: 15px; height: 15px; }
+

@@ -265,3 +265,4 @@ document.getElementById('modalCriarPedido').addEventListener('click', function(e
 /* ========== INICIALIZAÇÃO ========== */
 atualizarResumo();
 renderizarTabela();
+

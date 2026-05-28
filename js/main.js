@@ -10,9 +10,8 @@ function fecharModal() {
 }
 
 function sairSistema() {
-    window.location.href = "login.php";
+    window.location.href = "logout.php";
 }
-
 
 // MODAL DE + NOVO PRODUTO
 function abrirModalProduto() {
@@ -32,8 +31,6 @@ window.addEventListener("click", function(e){
         fecharModalProduto();
     }
 });
-
-
 
 
 // BUSCA DE PRODUTOS
@@ -59,7 +56,6 @@ function buscarProdutos() {
 }
 
 
-
 // MODAL DE EXCLUIR PRODUTO
 let produtoSelecionado = null;
 
@@ -67,10 +63,19 @@ function abrirModalExcluir(botao){
 
     produtoSelecionado = botao.closest(".product-card");
 
-    document.getElementById("deleteModal").style.display = "flex";
+    const id = botao.getAttribute("data-id");
+    console.log("ID capturado:", id);
 
+    const input = document.getElementById("inputIdDeletar");
+    console.log("Input encontrado:", input);
+
+    input.value = id;
+    console.log("Valor após atribuição:", input.value);
+
+    document.getElementById("deleteModal").style.display = "flex";
     document.body.style.overflow = "hidden";
 }
+
 
 function fecharModalExcluir(){
 
@@ -92,7 +97,6 @@ function confirmarExclusao(){
 // ALERT PARA CRIAR NOVO PRODUTO
 // ===== TOAST SaaS Premium (à prova de tudo) =====
 (function initToastSystem() {
-  // Cria container se não existir
   let container = document.getElementById("toastContainer");
   if (!container) {
     container = document.createElement("div");
@@ -101,7 +105,6 @@ function confirmarExclusao(){
     document.body.appendChild(container);
   }
 
-  // Injeta CSS mínimo se não existir (para garantir que aparece)
   if (!document.getElementById("toastStyles")) {
     const style = document.createElement("style");
     style.id = "toastStyles";
@@ -143,7 +146,6 @@ function confirmarExclusao(){
     document.head.appendChild(style);
   }
 
-  // Função global: sucesso
   window.toastSucesso = function (mensagem, titulo = "Sucesso") {
     const c = document.getElementById("toastContainer") || container;
 
@@ -159,10 +161,8 @@ function confirmarExclusao(){
 
     c.appendChild(toast);
 
-    // anima entrada
     requestAnimationFrame(() => toast.classList.add("show"));
 
-    // sai e remove
     setTimeout(() => {
       toast.classList.remove("show");
       setTimeout(() => toast.remove(), 350);
@@ -174,7 +174,7 @@ function confirmarExclusao(){
 
 window.salvarProduto = function () {
   toastSucesso("Produto salvo com sucesso!", "Produto cadastrado");
-  fecharModalProduto(); // se você já tem essa função
+  fecharModalProduto();
 };
 
 
@@ -188,14 +188,3 @@ function salvarAlteracoes(){
     }, 1500);
 
 }
-
-
-
-
-
-
-
-
-
-
-
